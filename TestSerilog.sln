@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication1", "WebApplication1\WebApplication1.csproj", "{B1ECC4A0-EA4F-429D-BE0E-7D04B2D8E15F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSerilog", "TestSerilog\TestSerilog.csproj", "{B1ECC4A0-EA4F-429D-BE0E-7D04B2D8E15F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
