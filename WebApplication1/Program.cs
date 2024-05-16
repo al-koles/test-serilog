@@ -1,9 +1,12 @@
+using System.Diagnostics;
 using Serilog;
 using Serilog.Context;
+using Serilog.Formatting.Compact;
 
 Log.Logger = new LoggerConfiguration()
     .WriteTo
-    .Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3} {CorrelationId}] {Message}{NewLine}{Exception}")
+    // .Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3} {CorrelationId}] {Message}{NewLine}{Exception}")
+    .Console(new CompactJsonFormatter())
     .Enrich
     .FromLogContext()
     .CreateLogger();
@@ -11,34 +14,45 @@ Log.Logger = new LoggerConfiguration()
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Logging.ClearProviders();
-// builder.Logging.AddJsonConsole(opt =>
-// {
-//     opt.IncludeScopes = true;
-//     opt.JsonWriterOptions = new JsonWriterOptions()
-//     {
-//         Indented = true
-//     };
-// });
-builder.Logging.AddSerilog();
+builder.Services.AddSerilog();
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var app = builder.Build();
+await using var app = builder.Build();
 
-// app.UseSerilogRequestLogging();
 app.Use(async (context, next) =>
 {
     context.Request.Headers.TryGetValue("X-Correlation-Id", out var correlationIds);
     var correlationId = correlationIds.FirstOrDefault();
     if (string.IsNullOrEmpty(correlationId))
+    {
         correlationId = Guid.NewGuid().ToString();
+        context.Request.Headers["X-Correlation-Id"] = correlationId;
+    }
 
     using (LogContext.PushProperty("CorrelationId", correlationId))
     {
         await next(context);
+    }
+});
+app.UseSerilogRequestLogging();
+app.Use(async (context, next) =>
+{
+    var stopwatch = new Stopwatch();
+    stopwatch.Start();
+
+    await next();
+
+    stopwatch.Stop();
+    using var loggerFactory = context.RequestServices.GetRequiredService<ILoggerFactory>();
+    var logger = loggerFactory.CreateLogger("RequestLoggingMiddleware");
+    using (logger.BeginScope(new Dictionary<string, object>
+           {
+               ["ElapsedMilliseconds"] = stopwatch.Elapsed.TotalMilliseconds,
+           }))
+    {
+        logger.LogInformation("Request finished is ms FFFFFFFFFFFF");
     }
 });
 
@@ -75,7 +89,7 @@ app.MapGet("/weatherforecast", (ILoggerFactory loggerFactory) =>
     .WithName("GetWeatherForecast")
     .WithOpenApi();
 
-app.Run();
+await app.RunAsync();
 
 internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
 {
