@@ -22,7 +22,7 @@ jobs:
       id: version
       run: |
         # Extract the current version from the project file
-        current_version=$(grep -oP '(?<=<Version>).*?(?=</Version>)' TestSerilog.csproj)
+        current_version=$(grep -oP '(?<=<Version>).*?(?=</Version>)' TestSerilog/TestSerilog.csproj)
         echo "Current version: $current_version"
 
         # Increment the patch version
@@ -32,7 +32,7 @@ jobs:
         echo "New version: $new_version"
 
         # Update the project file with the new version
-        sed -i "s/<Version>.*<\/Version>/<Version>$new_version<\/Version>/" TestSerilog.csproj
+        sed -i "s/<Version>.*<\/Version>/<Version>$new_version<\/Version>/" TestSerilog/TestSerilog.csproj
 
         # Commit the version bump and create a new tag
         git config --global user.name 'github-actions'
