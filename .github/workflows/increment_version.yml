@@ -9,12 +9,17 @@ jobs:
   version-bump:
     runs-on: ubuntu-latest
 
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
+
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Set up .NET
-      uses: actions/setup-dotnet@v2
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '8.0.x'
 
@@ -35,10 +40,16 @@ jobs:
         sed -i "s/<Version>.*<\/Version>/<Version>$new_version<\/Version>/" TestSerilog/TestSerilog.csproj
 
         # Commit the version bump and create a new tag
-        git config --global user.name 'github-actions'
-        git config --global user.email 'github-actions@github.com'
-        git commit -am "Bump version to $new_version"
-        git tag "$new_version"
-        git push origin develop --tags
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # git config --global user.name 'github-actions'
+        # git config --global user.email 'github-actions@github.com'
+        # git commit -am "Bump version to $new_version"
+        # git tag "$new_version"
+        # git push origin develop --tags
+  
+    - name: Commit changes
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: "Bump version to $new_version"
+        commit_user_name: "github-actions"
+        commit_user_email: "github-actions@github.com"
+        tagging_message: "$new_version"
