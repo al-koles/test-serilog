@@ -25,8 +25,8 @@ jobs:
 
     - name: Bump version
       id: version
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
+      #env:
+      #  GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
         git config --global user.name 'github-actions'
         git config --global user.email 'github-actions@github.com'
