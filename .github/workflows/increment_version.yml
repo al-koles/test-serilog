@@ -32,7 +32,9 @@ jobs:
         git config --global user.email 'github-actions@github.com'
 
         # Get the latest tag
-        git branch
+        branch=$(git branch)
+        echo "Current branch: $branch"
+        
         latest_tag=$(git describe --tags --abbrev=0 --match *.*.*)
         echo "Latest tag: $latest_tag"
 
