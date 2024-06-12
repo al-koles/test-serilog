@@ -35,6 +35,8 @@ jobs:
         branch=$(git branch)
         echo "Current branch: $branch"
         
+        git describe --tags --abbrev=0 --match *.*.*
+        
         latest_tag=$(git describe --tags --abbrev=0 --match *.*.*)
         echo "Latest tag: $latest_tag"
 
