@@ -25,7 +25,12 @@ jobs:
 
     - name: Bump version
       id: version
+      env:
+        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
       run: |
+        git config --global user.name 'github-actions'
+        git config --global user.email 'github-actions@github.com'
+
         # Get the latest tag
         latest_tag=$(git describe --tags --abbrev=0 --match *.*.*)
         echo "Latest tag: $latest_tag"
@@ -46,16 +51,7 @@ jobs:
         new_patch=$((patch + 1))
         new_version="$major.$minor.$new_patch"
         echo "New version: $new_version"
-        echo "new_version=$new_version" >> $GITHUB_ENV
 
-    - name: Create new tag via GitHub API
-      env:
-        GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
-      run: |
-        new_version=v${{ env.new_version }}
-
-        # Commit the version bump and create a new tag
-        git config --global user.name 'github-actions'
-        git config --global user.email 'github-actions@github.com'
+        # Add tag
         git tag "$new_version"
         git push origin develop --tags
